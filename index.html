@@ -302,7 +302,7 @@ function nextId(){return "local-"+(++_id);}
 async function apiGet(){
   if(!API_URL) return false;
   try{
-    var r=await fetch(API_URL+"?v="+Date.now());
+    var r=await fetch(API_URL+"?v="+Date.now(),{redirect:"follow"});
     var j=await r.json();
     if(j.ok){S=Object.assign(S,j.data);return true;}
   }catch(e){console.error(e);}
@@ -311,7 +311,12 @@ async function apiGet(){
 async function apiPost(accion,datos){
   if(!API_URL){toast("Configura la URL de la API","err");return null;}
   try{
-    var r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({accion:accion,datos:datos})});
+    var r=await fetch(API_URL,{
+      method:"POST",
+      redirect:"follow",
+      headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({accion:accion,datos:datos})
+    });
     var j=await r.json();
     if(!j.ok) throw new Error(j.error);
     return j.result||{};
