@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>CondoAdmin — Torre Palmas San Pedro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#4f46e5;--brand-dark:#3730a3;--brand-light:#eef2ff;
+  --emerald:#059669;--rose:#e11d48;--amber:#d97706;--blue:#2563eb;
+  --slate50:#f8fafc;--slate100:#f1f5f9;--slate200:#e2e8f0;
+  --slate400:#94a3b8;--slate500:#64748b;--slate600:#475569;
+  --slate700:#334155;--slate800:#1e293b;
+  --r:14px;--rs:10px;--sh:0 1px 4px rgba(0,0,0,.08);--shm:0 4px 16px rgba(0,0,0,.10);
+}
+html{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--slate50);color:var(--slate800);-webkit-font-smoothing:antialiased;font-size:16px}
+body{max-width:480px;margin:0 auto;min-height:100vh}
+
+/* ── Typography ── */
+h1{font-size:1.2rem;font-weight:800}
+h2{font-size:1rem;font-weight:700}
+
+/* ── Layout ── */
+#app-header{background:#fff;border-bottom:1px solid var(--slate100);padding:12px 16px;position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+#header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#month-bar{display:flex;align-items:center;justify-content:space-between;background:var(--slate100);border-radius:var(--rs);padding:8px 14px}
+#month-bar button{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--slate500);width:28px}
+#month-bar span{font-weight:700;font-size:.9rem;color:var(--slate700)}
+#content{padding:16px;padding-bottom:90px}
+#app-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--slate100);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;border:none;background:none;cursor:pointer;color:var(--slate400);gap:2px;transition:color .15s}
+.nav-btn.active{color:var(--brand)}
+.nav-btn .nb-icon{font-size:1.2rem;line-height:1}
+.nav-btn .nb-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.nav-btn .nb-dot{width:4px;height:4px;border-radius:50%;background:var(--brand);opacity:0;margin-top:1px}
+.nav-btn.active .nb-dot{opacity:1}
+
+/* ── Cards ── */
+.card{background:#fff;border-radius:var(--r);border:1px solid var(--slate100);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--slate100);display:flex;align-items:center;justify-content:space-between}
+.card-header h3{font-size:.85rem;font-weight:700;color:var(--slate700)}
+.divide>*+*{border-top:1px solid var(--slate50)}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px}
+.bg-green{background:#d1fae5;color:#065f46}.bg-red{background:#fee2e2;color:#991b1b}
+.bg-amber{background:#fef3c7;color:#92400e}.bg-blue{background:#dbeafe;color:#1e40af}
+.bg-violet{background:#ede9fe;color:#5b21b6}.bg-slate{background:var(--slate100);color:var(--slate600)}
+.bg-rose{background:#ffe4e6;color:#9f1239}.bg-indigo{background:#e0e7ff;color:#3730a3}
+
+/* ── Gradient cards ── */
+.grad{border-radius:var(--r);padding:14px;color:#fff;box-shadow:var(--shm)}
+.grad-indigo{background:linear-gradient(135deg,#6366f1,#4338ca)}
+.grad-emerald{background:linear-gradient(135deg,#10b981,#059669)}
+.grad-rose{background:linear-gradient(135deg,#f43f5e,#e11d48)}
+.grad-slate{background:linear-gradient(135deg,#475569,#334155)}
+.grad-red{background:linear-gradient(135deg,#ef4444,#dc2626)}
+
+/* ── Stats grid ── */
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.75}
+.stat-val{font-size:.95rem;font-weight:800;margin-top:4px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;transition:all .15s;font-size:.82rem;padding:10px 16px}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn-sm{padding:6px 12px;font-size:.73rem}
+.btn-lg{padding:13px 16px;font-size:.9rem;width:100%}
+.btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-dark)}
+.btn-ghost{background:var(--slate100);color:var(--slate700)}.btn-ghost:hover{background:var(--slate200)}
+.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
+.btn-danger{background:#e11d48;color:#fff}.btn-danger:hover{background:#be123c}
+.btn-amber{background:#d97706;color:#fff}
+.btn-outline{background:#fff;border:1.5px solid var(--slate200);color:var(--slate700)}
+.btn-full{width:100%}
+
+/* ── Form ── */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.78rem;font-weight:600;color:var(--slate600);margin-bottom:5px}
+.inp,.sel{width:100%;border:1.5px solid var(--slate200);border-radius:var(--rs);padding:10px 12px;font-family:inherit;font-size:.85rem;color:var(--slate800);background:#fff;outline:none;transition:border-color .15s}
+.inp:focus,.sel:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+
+/* ── Item row ── */
+.item{padding:14px 16px;display:flex;align-items:center;gap:12px}
+.item-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0}
+.item-body{flex:1;min-width:0}
+.item-body .name{font-weight:700;font-size:.85rem;color:var(--slate800)}
+.item-body .sub{font-size:.72rem;color:var(--slate500);margin-top:2px}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal-box{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--slate100);position:sticky;top:0;background:#fff;z-index:1}
+.modal-header h3{font-size:1rem;font-weight:800}
+.modal-close{background:none;border:none;font-size:1.6rem;cursor:pointer;color:var(--slate400);line-height:1;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.modal-close:hover{background:var(--slate100)}
+.modal-body{padding:20px}
+
+/* ── Full screen page ── */
+.fullpage{position:fixed;inset:0;background:var(--slate50);overflow-y:auto;z-index:150}
+.fullpage-inner{max-width:480px;margin:0 auto;padding:24px 16px 40px}
+
+/* ── Misc ── */
+.row{display:flex;gap:8px;align-items:center}
+.row-between{display:flex;justify-content:space-between;align-items:center}
+.space-y>*+*{margin-top:10px}
+.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-5{margin-top:20px}
+.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}
+.text-xs{font-size:.75rem}.text-sm{font-size:.85rem}
+.font-bold{font-weight:700}.font-extrabold{font-weight:800}
+.text-slate{color:var(--slate500)}.text-brand{color:var(--brand)}
+.text-rose{color:var(--rose)}.text-emerald{color:var(--emerald)}.text-amber{color:var(--amber)}
+.empty{text-align:center;padding:40px 20px;color:var(--slate400);font-size:.85rem}
+.info-box{background:var(--brand-light);border:1px solid #c7d2fe;border-radius:var(--rs);padding:12px 14px}
+.warn-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--rs);padding:12px 14px}
+.danger-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:var(--rs);padding:12px 14px}
+.success-box{background:#d1fae5;border:1px solid #6ee7b7;border-radius:var(--rs);padding:12px 14px}
+
+/* ── Toggle ── */
+.toggle-bar{display:flex;background:var(--slate100);border-radius:var(--rs);padding:4px;gap:4px;margin-bottom:16px}
+.toggle-btn{flex:1;padding:8px;border:none;background:none;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;color:var(--slate500);transition:all .15s}
+.toggle-btn.active{background:#fff;color:var(--slate800);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+/* ── Back header ── */
+.back-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.back-btn{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--slate400);line-height:1}
+.back-btn:hover{color:var(--slate700)}
+.back-header h2{font-size:1.05rem;font-weight:800}
+
+/* ── Progress bar ── */
+.progress-wrap{height:6px;background:var(--slate100);border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;background:var(--brand);border-radius:99px;transition:width .4s}
+
+/* ── Rec card grid ── */
+.rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rec-card{background:#fff;border:2px solid var(--slate100);border-radius:var(--r);padding:12px;cursor:pointer;text-align:left;transition:all .15s}
+.rec-card:hover{border-color:#a5b4fc}
+.rec-card.done{border-color:#6ee7b7;background:#f0fdf4}
+
+/* ── Type selector ── */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.type-card{border:2px solid var(--slate200);border-radius:var(--r);padding:12px;cursor:pointer;text-align:left;transition:all .15s}
+.type-card.active{border-color:var(--brand);background:var(--brand-light)}
+
+/* ── Charts ── */
+.chart-wrap{position:relative;height:200px;margin-top:8px}
+.chart-mini{position:relative;height:140px;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{background:var(--slate50);color:var(--slate500);font-weight:700;padding:8px 10px;text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em}
+td{padding:7px 10px;color:var(--slate700);border-top:1px solid var(--slate50)}
+tfoot td{background:var(--slate50);font-weight:700;border-top:2px solid var(--slate200)}
+.tr{text-align:right}
+
+/* ── Saldo hero ── */
+.saldo-hero{border-radius:var(--r);padding:20px;color:#fff;margin-bottom:12px;box-shadow:var(--shm)}
+.saldo-hero.positive{background:linear-gradient(135deg,#4338ca,#312e81)}
+.saldo-hero.negative{background:linear-gradient(135deg,#dc2626,#991b1b)}
+.saldo-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;opacity:.7;margin-bottom:4px}
+.saldo-amount{font-size:2.4rem;font-weight:900;line-height:1}
+.saldo-breakdown{font-size:.7rem;opacity:.6;margin-top:8px;display:flex;gap:12px;flex-wrap:wrap}
+
+/* ── Loading ── */
+#loading{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+.spinner{width:36px;height:36px;border:3px solid var(--slate100);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Toaster ── */
+#toaster{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:300;pointer-events:none;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{background:var(--slate800);color:#fff;padding:9px 18px;border-radius:99px;font-size:.82rem;font-weight:600;animation:toastIn .25s ease forwards}
+.toast.ok{background:#065f46}.toast.err{background:#991b1b}
+@keyframes toastIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Config chip ── */
+.cfg-chip{display:flex;align-items:center;gap:6px;background:var(--brand-light);border:1px solid #c7d2fe;border-radius:var(--rs);padding:7px 10px;cursor:pointer;transition:background .15s}
+.cfg-chip:hover{background:#e0e7ff}
+.cfg-chip-icon{font-size:1.1rem}
+
+@media print{#app-header,#app-nav{display:none!important}#content{padding:0}}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <div style="font-size:2.5rem">🏢</div>
+  <div class="spinner"></div>
+  <p style="color:var(--slate500);font-size:.85rem" id="load-msg">Conectando con Google Sheets…</p>
+</div>
+
+<!-- Header -->
+<div id="app-header">
+  <div id="header-row">
+    <div>
+      <p style="font-size:.65rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.08em">Torre Palmas</p>
+      <h1 style="color:var(--slate800)">San Pedro</h1>
+    </div>
+    <button class="cfg-chip" onclick="openCfg()">
+      <span class="cfg-chip-icon">⚙️</span>
+      <div>
+        <p style="font-size:.6rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em;line-height:1">Configuración</p>
+        <p style="font-size:.78rem;font-weight:800;color:var(--brand-dark);line-height:1.2" id="header-cuota">$2,300</p>
+      </div>
+    </button>
+  </div>
+  <div id="month-bar">
+    <button onclick="prevMes()">&#8249;</button>
+    <span id="month-label">Mayo 2026</span>
+    <button onclick="nextMes()">&#8250;</button>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="content"></div>
+
+<!-- Nav -->
+<nav id="app-nav">
+  <button class="nav-btn active" id="nb-inicio" onclick="goTab('inicio')">
+    <span class="nb-icon">🏠</span><span class="nb-label">Inicio</span><div class="nb-dot"></div>
+  </button>
+  <button class="nav-btn" id="nb-registrar" onclick="goTab('registrar')">
+    <span class="nb-icon">＋</span><span class="nb-label">Registrar</span><div class="nb-dot"></div>
+  </button>
+  <button class="nav-btn" id="nb-reportes" onclick="goTab('reportes')">
+    <span class="nb-icon">📊</span><span class="nb-label">Reportes</span><div class="nb-dot"></div>
+  </button>
+</nav>
+
+<!-- Modal root -->
+<div id="modal-root"></div>
+<!-- Fullpage root -->
+<div id="page-root"></div>
+<!-- Toast -->
+<div id="toaster"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  API URL — se guarda en localStorage
+// ═══════════════════════════════════════════════════════
+var API_URL = localStorage.getItem("condoApiUrl") || "";
+
+// ═══════════════════════════════════════════════════════
+//  ESTADO GLOBAL
+// ═══════════════════════════════════════════════════════
+var S = {
+  deptos:[], pagos:[], gastos:[], extras:[], penas:[], adeudos:[], acuerdos:[],
+  recs:[], cuotaHist:[], adminHist:[], saldoApert:[],
+  mesIdx: new Date().getMonth(), ano: new Date().getFullYear(),
+  tab: "inicio",
+};
+var chartBar=null, chartLine=null, chartPie=null;
+var MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+var HOY=new Date(); var HOY_STR=HOY.toISOString().split("T")[0];
+var DIAS_DESC=5,DIAS_PENA=20,PCT=0.05,MESES_ANUAL=11;
+var FREC_ICON={semanal:"📅",quincenal:"📆",mensual:"🗓️",bimestral:"📊"};
+var FREC_LABEL={semanal:"Cada sábado",quincenal:"Quincenal",mensual:"Mensual",bimestral:"Bimestral"};
+var COLORES=["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316"];
+var _id=0; // local id counter for unsaved items
+
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+function mesKey(m,y){return y+"-"+String(m+1).padStart(2,"0");}
+function mk(){return mesKey(S.mesIdx,S.ano);}
+function fmt(n){return "$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2});}
+function fmtF(f){return new Date(f+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"});}
+function diaNum(f){return new Date(f+"T12:00:00").getDate();}
+function cuotaBase(){var h=S.cuotaHist;return h.length?+(h[h.length-1].monto):2300;}
+function adminId(){var h=S.adminHist;return h.length?+(h[h.length-1].depId):null;}
+function depsPagables(){return S.deptos.filter(function(d){return +d.id!==adminId();});}
+function acuerdoActivo(depId){var a=S.acuerdos.find(function(x){return +x.depId===+depId;});return a&&(a.activo===true||a.activo==="TRUE"||a.activo==="true");}
+function adeudosDep(depId){return S.adeudos.filter(function(a){return +a.depId===+depId;});}
+function penasDep(depId){return S.penas.filter(function(p){return +p.depId===+depId;});}
+function totalAdeudo(depId){return adeudosDep(depId).reduce(function(s,a){return s+(+a.monto);},0)+penasDep(depId).reduce(function(s,p){return s+(+p.monto);},0);}
+function apertura(ano){var s=S.saldoApert.find(function(x){return +x.ano===+ano;});return s?+s.monto:0;}
+function saldoReal(){
+  var ap=apertura(S.ano);
+  var ing=S.pagos.filter(function(p){return p.mes&&String(p.mes).startsWith(String(S.ano));}).reduce(function(s,p){return s+(+p.monto);},0);
+  var eg=S.gastos.filter(function(g){return g.fecha&&String(g.fecha).startsWith(String(S.ano));}).reduce(function(s,g){return s+(+g.monto);},0);
+  return {ap:ap,ing:ing,eg:eg,total:ap+ing-eg};
+}
+function calcTarifa(fecha,depId){
+  var cb=cuotaBase(); var d=diaNum(fecha);
+  var adeud=totalAdeudo(depId); var tieneDeuda=adeud>0;
+  var tieneAcuerdo=acuerdoActivo(depId);
+  var desc=0,penaProx=0;
+  if(d<=DIAS_DESC&&(!tieneDeuda||tieneAcuerdo)) desc=Math.round(cb*PCT);
+  else if(d>DIAS_PENA&&!tieneDeuda) penaProx=Math.round(cb*PCT);
+  return {cb:cb,adeud:adeud,desc:desc,penaProx:penaProx};
+}
+function h(tag,cls,html,attrs){
+  var a=attrs||{};
+  var atStr=Object.keys(a).map(function(k){return " "+k+'="'+a[k]+'"';}).join("");
+  return "<"+tag+(cls?' class="'+cls+'"':"")+atStr+">"+(html||"")+"</"+tag+">";
+}
+function nextId(){return "local-"+(++_id);}
+
+// ═══════════════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════════════
+async function apiGet(){
+  if(!API_URL) return false;
+  try{
+    var r=await fetch(API_URL+"?v="+Date.now());
+    var j=await r.json();
+    if(j.ok){S=Object.assign(S,j.data);return true;}
+  }catch(e){console.error(e);}
+  return false;
+}
+async function apiPost(accion,datos){
+  if(!API_URL){toast("Configura la URL de la API","err");return null;}
+  try{
+    var r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({accion:accion,datos:datos})});
+    var j=await r.json();
+    if(!j.ok) throw new Error(j.error);
+    return j.result||{};
+  }catch(e){toast("Error: "+e.message,"err");return null;}
+}
+function toast(msg,type){
+  var t=document.createElement("div");
+  t.className="toast"+(type?" "+type:"");t.textContent=msg;
+  document.getElementById("toaster").appendChild(t);
+  setTimeout(function(){t.remove();},3000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goTab(tab){
+  S.tab=tab;
+  document.querySelectorAll(".nav-btn").forEach(function(b){b.classList.remove("active");});
+  document.getElementById("nb-"+tab).classList.add("active");
+  var hideMonthBar=["reportes"];
+  document.getElementById("month-bar").style.display=hideMonthBar.includes(tab)?"none":"flex";
+  render();
+}
+function prevMes(){if(S.mesIdx===0){S.mesIdx=11;S.ano--;}else S.mesIdx--;render();}
+function nextMes(){if(S.mesIdx===11){S.mesIdx=0;S.ano++;}else S.mesIdx++;render();}
+function render(){
+  document.getElementById("month-label").textContent=MESES[S.mesIdx]+" "+S.ano;
+  document.getElementById("header-cuota").textContent=fmt(cuotaBase());
+  var c=document.getElementById("content");
+  if(S.tab==="inicio") c.innerHTML=renderInicio();
+  else if(S.tab==="registrar") c.innerHTML=renderRegistrar();
+  else if(S.tab==="reportes") c.innerHTML=renderReportes();
+  attachEvents();
+}
+
+// ═══════════════════════════════════════════════════════
+//  MODAL / FULLPAGE
+// ═══════════════════════════════════════════════════════
+function openModal(html){document.getElementById("modal-root").innerHTML='<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal-box">'+html+'</div></div>';}
+function closeModal(){document.getElementById("modal-root").innerHTML="";}
+function openPage(html){document.getElementById("page-root").innerHTML='<div class="fullpage"><div class="fullpage-inner">'+html+"</div></div>";}
+function closePage(){document.getElementById("page-root").innerHTML="";}
+function modalHeader(title){return '<div class="modal-header"><h3>'+title+'</h3><button class="modal-close" onclick="closeModal()">&#215;</button></div><div class="modal-body">';}
+function backHeader(title,fn){return '<div class="back-header"><button class="back-btn" onclick="'+fn+'">&#8592;</button><h2>'+title+'</h2></div>';}
+
+// ═══════════════════════════════════════════════════════
+//  TAB INICIO
+// ═══════════════════════════════════════════════════════
+function renderInicio(){
+  var m=mk();
+  var pagosMes=S.pagos.filter(function(p){return p.mes===m;});
+  var gastosMes=S.gastos.filter(function(g){return g.fecha&&g.fecha.startsWith(m);});
+  var extMes=S.extras.filter(function(e){return e.mes===m;}).reduce(function(s,e){return s+(+e.monto);},0);
+  var dp=depsPagables();
+  var pagaron={};pagosMes.forEach(function(p){pagaron[p.depId]=true;});
+  var pendientes=dp.filter(function(d){return !pagaron[d.id];});
+  var totalIng=pagosMes.reduce(function(s,p){return s+(+p.monto);},0);
+  var totalEg=gastosMes.reduce(function(s,g){return s+(+g.monto);},0);
+  var saldoMes=totalIng-totalEg;
+  var sr=saldoReal();
+
+  // Recurrentes pendientes hoy
+  var recsPend=S.recs.filter(function(r){
+    if(r.frec==="bimestral") return false;
+    return !S.gastos.some(function(g){return +g.recId===+r.id&&g.fecha&&g.fecha.startsWith(m);});
+  });
+
+  // Últimos movimientos
+  var movs=pagosMes.map(function(p){
+    var d=S.deptos.find(function(x){return +x.id===+p.depId;});
+    return {fecha:p.fecha,label:"Pago Depto "+(d?d.num:""),monto:+p.monto,tipo:"ing"};
+  }).concat(gastosMes.map(function(g){
+    return {fecha:g.fecha,label:g.concepto,monto:+g.monto,tipo:"eg"};
+  })).sort(function(a,b){return (b.fecha||"").localeCompare(a.fecha||"");}).slice(0,6);
+
+  var out="";
+
+  // Saldo real hero
+  out+='<div class="saldo-hero '+(sr.total>=0?"positive":"negative")+'">';
+  out+='<div class="saldo-label">Saldo en caja '+S.ano+'</div>';
+  out+='<div class="saldo-amount">'+fmt(sr.total)+'</div>';
+  if(sr.ap>0){
+    out+='<div class="saldo-breakdown"><span>Apertura '+fmt(sr.ap)+'</span><span>+Ingresos '+fmt(sr.ing)+'</span><span>−Egresos '+fmt(sr.eg)+'</span></div>';
+  } else {
+    out+='<p style="font-size:.7rem;opacity:.55;margin-top:8px">Configura el saldo de apertura en ⚙️</p>';
+  }
+  out+='</div>';
+
+  // KPIs mes
+  out+='<div class="stats3">';
+  [[fmt(totalIng),"Ingresos","grad-emerald"],[fmt(totalEg),"Egresos","grad-rose"],[fmt(Math.abs(saldoMes)),saldoMes>=0?"Saldo mes":"Déficit",saldoMes>=0?"grad-slate":"grad-red"]].forEach(function(k){
+    out+='<div class="grad '+k[2]+'"><div class="stat-label">'+k[1]+'</div><div class="stat-val">'+k[0]+'</div></div>';
+  });
+  out+='</div>';
+
+  // Pagos del mes
+  out+='<div class="card">';
+  out+='<div class="card-header"><h3>🏠 Pagos del mes</h3>';
+  out+='<div class="row" style="gap:6px"><span class="badge bg-green">'+pagosMes.length+' pagados</span>';
+  if(pendientes.length>0) out+='<span class="badge bg-red">'+pendientes.length+' pendientes</span>';
+  out+='</div></div>';
+  out+='<div style="padding:10px 16px 4px">';
+  out+='<div class="progress-wrap"><div class="progress-bar" style="width:'+(dp.length>0?(pagosMes.length/dp.length*100):0)+'%"></div></div>';
+  out+='<p style="font-size:.72rem;color:var(--slate400);text-align:right;margin-top:4px">'+pagosMes.length+' de '+dp.length+'</p>';
+  out+='</div>';
+  if(pendientes.length>0){
+    out+='<div class="divide">';
+    pendientes.slice(0,4).forEach(function(d){
+      var ad=totalAdeudo(d.id);
+      var total=cuotaBase()+ad+extMes;
+      out+='<div class="item"><div class="item-body"><div class="name">'+d.nombre+'</div>';
+      out+='<div class="sub">Depto '+d.num+(ad>0?" · adeudo "+fmt(ad):"")+'</div></div>';
+      out+='<span style="font-weight:800;color:var(--rose)">'+fmt(total)+'</span></div>';
+    });
+    if(pendientes.length>4) out+='<p style="text-align:center;font-size:.72rem;color:var(--slate400);padding:8px">+'+( pendientes.length-4)+' más</p>';
+    out+='</div>';
+  }
+  out+='</div>';
+
+  // Recurrentes pendientes
+  if(recsPend.length>0){
+    out+='<div class="card">';
+    out+='<div class="card-header"><h3>📅 Gastos recurrentes pendientes</h3><span class="badge bg-amber">'+recsPend.length+'</span></div>';
+    out+='<div class="divide">';
+    recsPend.forEach(function(r){
+      out+='<div class="item"><div class="item-body"><div class="name">'+r.concepto+'</div>';
+      out+='<div class="sub">'+FREC_LABEL[r.frec]+" · "+(r.variable?"Variable":fmt(r.monto))+'</div></div>';
+      out+='<button class="btn btn-success btn-sm" onclick="quickRegRec('+r.id+')">&#10003; Reg.</button></div>';
+    });
+    out+='</div></div>';
+  }
+
+  // Últimos movimientos
+  if(movs.length>0){
+    out+='<div class="card"><div class="card-header"><h3>Últimos movimientos</h3></div><div class="divide">';
+    movs.forEach(function(m){
+      out+='<div class="item">';
+      out+='<div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;background:'+(m.tipo==="ing"?"#d1fae5":"#fee2e2")+';color:'+(m.tipo==="ing"?"#065f46":"#991b1b")+'">'+(m.tipo==="ing"?"↓":"↑")+'</div>';
+      out+='<div class="item-body"><div class="name" style="font-size:.82rem">'+m.label+'</div><div class="sub">'+fmtF(m.fecha)+'</div></div>';
+      out+='<span style="font-weight:700;font-size:.85rem;color:'+(m.tipo==="ing"?"var(--emerald)":"var(--rose)")+'">'+(m.tipo==="ing"?"+":"-")+fmt(m.monto)+'</span>';
+      out+='</div>';
+    });
+    out+='</div></div>';
+  }
+
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════
+//  TAB REGISTRAR
+// ═══════════════════════════════════════════════════════
+function renderRegistrar(){
+  var out='<h2 class="mb-4">¿Qué quieres registrar?</h2>';
+
+  // Dos opciones grandes
+  [
+    {fn:"openPago()",icon:"💳",bg:"#d1fae5",label:"Recibir pago",sub:"Registrar pago de mantenimiento de un departamento"},
+    {fn:"openGasto()",icon:"🧾",bg:"#fee2e2",label:"Registrar gasto",sub:"Limpieza, vigilancia, servicios u otro gasto"},
+  ].forEach(function(o){
+    out+='<button onclick="'+o.fn+'" style="width:100%;background:#fff;border:2px solid var(--slate100);border-radius:var(--r);padding:20px;text-align:left;cursor:pointer;margin-bottom:10px;transition:all .15s" onmouseover="this.style.borderColor=\'#a5b4fc\'" onmouseout="this.style.borderColor=\'var(--slate100)\'">';
+    out+='<div class="row"><div style="width:52px;height:52px;border-radius:14px;background:'+o.bg+';display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">'+o.icon+'</div>';
+    out+='<div style="flex:1"><p style="font-weight:800;font-size:.95rem;color:var(--slate800)">'+o.label+'</p><p style="font-size:.8rem;color:var(--slate500);margin-top:3px">'+o.sub+'</p></div>';
+    out+='<span style="color:var(--slate300);font-size:1.2rem">›</span></div></button>';
+  });
+
+  // Acceso rápido recurrentes
+  out+='<p style="font-size:.65rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px">Acceso rápido — recurrentes</p>';
+  out+='<div class="rec-grid">';
+  var m=mk();
+  S.recs.forEach(function(r){
+    var cnt=S.gastos.filter(function(g){return +g.recId===+r.id&&g.fecha&&g.fecha.startsWith(m);}).length;
+    out+='<button class="rec-card'+(cnt>0?" done":"")+'" onclick="quickRegRec('+r.id+')">';
+    out+='<div class="row-between mb-2"><span>'+FREC_ICON[r.frec]+'</span>'+(cnt>0?'<span style="font-size:.72rem;font-weight:700;color:#059669">&#10003; '+cnt+'x</span>':'')+'</div>';
+    out+='<p style="font-weight:700;font-size:.82rem;color:var(--slate800);line-height:1.3">'+r.concepto+'</p>';
+    out+='<p style="font-size:.7rem;color:var(--slate400);margin-top:3px">'+(r.variable?"Variable":fmt(r.monto))+'</p>';
+    out+='</button>';
+  });
+  out+='</div>';
+  return out;
+}
+
+// ── Registrar pago ────────────────────────────────────
+function openPago(){
+  var dp=depsPagables();
+  var m=mk();
+  var extMes=S.extras.filter(function(e){return e.mes===m;}).reduce(function(s,e){return s+(+e.monto);},0);
+
+  var opts=dp.map(function(d){
+    var ad=totalAdeudo(d.id);
+    var ac=acuerdoActivo(d.id);
+    var tag=ad>0?(ac?" 🤝":" ⚠️"):"";
+    return '<option value="'+d.id+'">Depto '+d.num+' — '+d.nombre+tag+'</option>';
+  }).join("");
+
+  openModal(modalHeader("Recibir pago")+
+    '<div class="type-grid">'+
+    '<div class="type-card active" id="tipo-mensual" onclick="selTipo(\'mensual\')"><p style="font-size:1.2rem">💳</p><p style="font-weight:700;font-size:.82rem;margin-top:4px">Mensual</p></div>'+
+    '<div class="type-card" id="tipo-anual" onclick="selTipo(\'anual\')"><p style="font-size:1.2rem">⭐</p><p style="font-weight:700;font-size:.82rem;margin-top:4px">Anual — 11 meses</p></div>'+
+    '</div>'+
+    '<div class="field"><label>Departamento</label><select class="sel" id="p-dep" onchange="updatePagoCalc()"><option value="">Selecciona…</option>'+opts+'</select></div>'+
+    '<div class="field"><label>Fecha de pago</label><input type="date" class="inp" id="p-fecha" value="'+HOY_STR+'" max="'+HOY_STR+'" onchange="updatePagoCalc()"></div>'+
+    '<div id="p-aviso" style="display:none"></div>'+
+    '<div id="p-calc" style="display:none"></div>'+
+    '<div class="field"><label>Monto recibido ($) <span style="color:var(--slate400);font-weight:400">— vacío si es el total</span></label><input type="number" class="inp" id="p-monto" placeholder="Total esperado" oninput="updatePagoCalc()"></div>'+
+    '<div id="p-parcial" style="display:none"></div>'+
+    '<div class="field"><label>Nota</label><input type="text" class="inp" id="p-nota" placeholder="Efectivo, transferencia…"></div>'+
+    '<div class="row" style="gap:8px;margin-top:4px"><button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-success" style="flex:2" id="p-guardar" onclick="guardarPago()">Registrar pago</button></div>'+
+    '</div>'
+  );
+  window._pagoTipo="mensual";
+}
+
+function selTipo(t){
+  window._pagoTipo=t;
+  ["mensual","anual"].forEach(function(x){
+    var el=document.getElementById("tipo-"+x);
+    if(el) el.className="type-card"+(x===t?" active":"");
+  });
+  updatePagoCalc();
+}
+
+function updatePagoCalc(){
+  var depId=document.getElementById("p-dep").value;
+  var fecha=document.getElementById("p-fecha").value;
+  var montoManual=document.getElementById("p-monto").value;
+  var tipo=window._pagoTipo||"mensual";
+  var m=mk();
+  var extMes=S.extras.filter(function(e){return e.mes===m;}).reduce(function(s,e){return s+(+e.monto);},0);
+  var cb=cuotaBase();
+
+  if(!depId||!fecha){
+    document.getElementById("p-calc").style.display="none";
+    document.getElementById("p-aviso").style.display="none";
+    return;
+  }
+
+  var ad=totalAdeudo(depId);
+  var ac=acuerdoActivo(depId);
+  var tieneDeuda=ad>0;
+  var t=calcTarifa(fecha,depId);
+  var manualDesc=document.getElementById("p-desc-manual")&&document.getElementById("p-desc-manual").checked;
+
+  var desc=t.desc;
+  // Si tiene deuda sin acuerdo, no desc automático
+  if(tieneDeuda&&!ac) desc=0;
+  // Override manual
+  if(manualDesc) desc=Math.round(cb*PCT);
+
+  var totalEsp=tipo==="anual"?(cb*MESES_ANUAL+ad):(cb+ad+extMes-desc);
+  var recibido=montoManual!==""?+montoManual:totalEsp;
+  var diferencia=totalEsp-recibido;
+
+  // Aviso de deuda/acuerdo
+  var aviso="";
+  if(tieneDeuda){
+    if(ac) aviso='<div class="info-box mb-3" style="background:#dbeafe;border-color:#93c5fd"><p style="font-size:.75rem;font-weight:700;color:#1e40af">🤝 Acuerdo de pago activo</p><p style="font-size:.72rem;color:#1d4ed8;margin-top:4px">Se respeta el descuento pronto pago en los primeros '+DIAS_DESC+' días.</p></div>';
+    else aviso='<div class="danger-box mb-3"><p style="font-size:.75rem;font-weight:700">⚠️ Tiene adeudo pendiente: '+fmt(ad)+'</p><p style="font-size:.72rem;margin-top:4px">Sin acuerdo activo, el descuento pronto pago no aplica automáticamente.</p></div>';
+  }
+  if(tieneDeuda&&!ac&&diaNum(fecha)<=DIAS_DESC){
+    aviso+='<label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--slate700);margin-bottom:12px;cursor:pointer"><input type="checkbox" id="p-desc-manual" onchange="updatePagoCalc()" style="width:15px;height:15px;accent-color:var(--brand)"> Aplicar descuento pronto pago manualmente ('+fmt(Math.round(cb*PCT))+')</label>';
+  }
+  document.getElementById("p-aviso").innerHTML=aviso;
+  document.getElementById("p-aviso").style.display=aviso?"block":"none";
+
+  // Cálculo
+  var calc='<div class="info-box mb-3"><p style="font-size:.68rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Cálculo</p>';
+  calc+='<div class="row-between text-sm mb-1"><span style="color:var(--slate600)">Cuota base</span><span>'+fmt(cb)+'</span></div>';
+  if(ad>0) calc+='<div class="row-between text-sm mb-1"><span style="color:var(--rose)">+ Adeudo acumulado</span><span style="color:var(--rose)">+'+fmt(ad)+'</span></div>';
+  if(extMes>0&&tipo!=="anual") calc+='<div class="row-between text-sm mb-1"><span style="color:var(--amber)">+ Cuota extraordinaria</span><span style="color:var(--amber)">+'+fmt(extMes)+'</span></div>';
+  if(desc>0) calc+='<div class="row-between text-sm mb-1"><span style="color:var(--emerald)">− Descuento pronto pago</span><span style="color:var(--emerald)">−'+fmt(desc)+'</span></div>';
+  calc+='<div class="row-between mb-0" style="border-top:1px solid #c7d2fe;padding-top:8px;margin-top:4px;font-weight:800;font-size:.95rem"><span>Total esperado</span><span style="color:var(--brand)">'+fmt(totalEsp)+'</span></div>';
+  if(t.penaProx>0&&!tieneDeuda) calc+='<p style="font-size:.7rem;color:var(--rose);margin-top:6px">Genera pena de '+fmt(t.penaProx)+' para el siguiente mes</p>';
+  calc+='</div>';
+  document.getElementById("p-calc").innerHTML=calc;
+  document.getElementById("p-calc").style.display="block";
+
+  // Pago parcial
+  var parcial="";
+  if(montoManual!==""&&diferencia>0.01){
+    parcial='<div class="warn-box mb-3"><p style="font-weight:700;font-size:.78rem;margin-bottom:6px">⚠️ Pago incompleto</p>';
+    parcial+='<div class="row-between text-sm mb-1"><span>Esperado</span><span>'+fmt(totalEsp)+'</span></div>';
+    parcial+='<div class="row-between text-sm mb-1"><span>Recibido</span><span>'+fmt(recibido)+'</span></div>';
+    parcial+='<div class="row-between text-sm" style="font-weight:700"><span>Nuevo adeudo</span><span style="color:var(--rose)">'+fmt(diferencia)+'</span></div>';
+    parcial+='<p style="font-size:.7rem;color:var(--amber);margin-top:6px">La diferencia se sumará al adeudo del siguiente mes.</p></div>';
+  }
+  document.getElementById("p-parcial").innerHTML=parcial;
+  document.getElementById("p-parcial").style.display=parcial?"block":"none";
+
+  // Actualizar botón
+  var btn=document.getElementById("p-guardar");
+  if(btn) btn.textContent="Registrar "+fmt(recibido);
+
+  window._pagoCalc={totalEsp:totalEsp,recibido:recibido,diferencia:diferencia,desc:desc,penaProx:t.penaProx,tieneDeuda:tieneDeuda};
+}
+
+async function guardarPago(){
+  var depId=document.getElementById("p-dep").value;
+  var fecha=document.getElementById("p-fecha").value;
+  var nota=document.getElementById("p-nota").value;
+  var tipo=window._pagoTipo||"mensual";
+  if(!depId||!fecha||!window._pagoCalc){toast("Completa los campos","err");return;}
+  var c=window._pagoCalc;
+  var m=mk();
+  var mesPago=m; var mesesAnuales=null;
+  if(tipo==="anual"){mesPago=mesKey(0,S.ano);mesesAnuales=[];for(var i=0;i<12;i++)mesesAnuales.push(mesKey(i,S.ano));}
+  var parcial=c.diferencia>0.01;
+
+  var datos={depId:+depId,mes:mesPago,fecha:fecha,monto:c.recibido,tipo:tipo,descuento:c.desc,
+    penaGenerada:c.penaProx,parcial:parcial,diferencia:parcial?c.diferencia:0,nota:nota,
+    mesesAnuales:mesesAnuales?JSON.stringify(mesesAnuales):""};
+
+  var res=await apiPost("addPago",datos);
+  if(res===null) return;
+  datos.id=res.id||nextId();
+  S.pagos.push(datos);
+
+  // Limpiar penas y adeudos si pago completo
+  if(!parcial){
+    await apiPost("clearPenas",{depId:+depId});
+    await apiPost("clearAdeudos",{depId:+depId});
+    S.penas=S.penas.filter(function(p){return +p.depId!==+depId;});
+    S.adeudos=S.adeudos.filter(function(a){return +a.depId!==+depId;});
+  } else {
+    // Registrar adeudo diferencia mes siguiente
+    var parts=m.split("-").map(Number);
+    var nextMk=parts[1]===12?mesKey(0,parts[0]+1):mesKey(parts[1],parts[0]);
+    var adDatos={depId:+depId,monto:c.diferencia,origen:m,tipo:"pago-parcial",nota:"Diferencia pago "+fmtF(fecha)};
+    var ar=await apiPost("addAdeudo",adDatos);
+    adDatos.id=ar&&ar.id?ar.id:nextId();
+    S.adeudos=S.adeudos.filter(function(a){return +a.depId!==+depId||a.tipo==="inicial";});
+    S.adeudos.push(adDatos);
+  }
+  // Pena
+  if(c.penaProx>0&&!c.tieneDeuda){
+    var pDatos={depId:+depId,monto:c.penaProx,origen:m};
+    var pr=await apiPost("addPena",pDatos);
+    pDatos.id=pr&&pr.id?pr.id:nextId();
+    S.penas.push(pDatos);
+  }
+  toast("Pago registrado ✓","ok");
+  closeModal(); render();
+}
+
+// ── Registrar gasto rápido ────────────────────────────
+function quickRegRec(recId){
+  var r=S.recs.find(function(x){return +x.id===+recId;});
+  if(!r) return;
+  var m=mk();
+  var cnt=S.gastos.filter(function(g){return +g.recId===+r.id&&g.fecha&&g.fecha.startsWith(m);}).length;
+  openModal(modalHeader("Registrar — "+r.concepto)+
+    (cnt>0?'<div class="success-box mb-3" style="font-size:.82rem">✓ Ya registrado '+cnt+'x este mes</div>':"")+
+    '<div class="field"><label>Fecha</label><input type="date" class="inp" id="qr-fecha" value="'+HOY_STR+'"></div>'+
+    '<div class="field"><label>Monto ($)</label><input type="number" class="inp" id="qr-monto" value="'+(r.monto||"")+'" placeholder="'+(r.monto||"Ingresa monto")+'"></div>'+
+    (r.notas?'<p style="font-size:.72rem;color:var(--slate400);font-style:italic;margin:-8px 0 12px">'+r.notas+'</p>':"")+
+    '<div class="field"><label>Nota (aguinaldo, variación…)</label><input type="text" class="inp" id="qr-nota" placeholder="Opcional"></div>'+
+    '<div class="row" style="gap:8px;margin-top:4px"><button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-success" style="flex:2" onclick="guardarRecRapido('+recId+')">Guardar</button></div>'+
+    '</div>'
+  );
+}
+async function guardarRecRapido(recId){
+  var r=S.recs.find(function(x){return +x.id===+recId;});
+  var fecha=document.getElementById("qr-fecha").value;
+  var monto=+document.getElementById("qr-monto").value;
+  var nota=document.getElementById("qr-nota").value;
+  if(!monto){toast("Ingresa el monto","err");return;}
+  var concepto=r.concepto+(nota?" — "+nota:"");
+  var datos={fecha:fecha,concepto:concepto,monto:monto,cat:r.cat,recId:r.id,comprobante:""};
+  var res=await apiPost("addGasto",datos);
+  if(res===null) return;
+  datos.id=res.id||nextId();
+  S.gastos.push(datos);
+  toast(r.concepto+" registrado ✓","ok");
+  closeModal(); render();
+}
+
+// ── Registrar gasto manual ────────────────────────────
+function openGasto(){
+  var cats=["Mantenimiento","Jardinería","Servicios","Reparaciones","Limpieza","Seguridad","Otros"];
+  var recOpts=S.recs.map(function(r){return '<option value="'+r.id+'">'+r.concepto+'</option>';}).join("");
+  openModal(modalHeader("Registrar gasto")+
+    '<div class="toggle-bar">'+
+    '<button class="toggle-btn active" id="gm-tab-rec" onclick="switchGastoTab(\'rec\')">📅 Recurrente</button>'+
+    '<button class="toggle-btn" id="gm-tab-manual" onclick="switchGastoTab(\'manual\')">✏️ Manual</button>'+
+    '</div>'+
+    '<div id="gm-rec">'+
+    '<p style="font-size:.8rem;color:var(--slate500);margin-bottom:12px">Selecciona el tipo de gasto recurrente:</p>'+
+    '<div class="field"><label>Gasto recurrente</label><select class="sel" id="gm-rec-sel" onchange="updateRecSel()"><option value="">Selecciona…</option>'+recOpts+'</select></div>'+
+    '<div id="gm-rec-fields" style="display:none">'+
+    '<div class="field"><label>Fecha</label><input type="date" class="inp" id="gm-rfecha" value="'+HOY_STR+'"></div>'+
+    '<div class="field"><label>Monto ($)</label><input type="number" class="inp" id="gm-rmonto" placeholder="Monto"></div>'+
+    '<div class="field"><label>Nota</label><input type="text" class="inp" id="gm-rnota" placeholder="Aguinaldo, variación…"></div>'+
+    '</div></div>'+
+    '<div id="gm-manual" style="display:none">'+
+    '<div class="field"><label>Fecha</label><input type="date" class="inp" id="gm-mfecha" value="'+HOY_STR+'"></div>'+
+    '<div class="field"><label>Concepto</label><input type="text" class="inp" id="gm-mconcepto" placeholder="Ej. Reparación plomería"></div>'+
+    '<div class="field"><label>Monto ($)</label><input type="number" class="inp" id="gm-mmonto"></div>'+
+    '<div class="field"><label>Categoría</label><select class="sel" id="gm-mcat">'+cats.map(function(c){return '<option>'+c+'</option>';}).join("")+'</select></div>'+
+    '</div>'+
+    '<div class="row" style="gap:8px;margin-top:4px"><button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-danger" style="flex:2" onclick="guardarGasto()">Registrar gasto</button></div>'+
+    '</div>'
+  );
+  window._gastoTab="rec";
+}
+function switchGastoTab(t){
+  window._gastoTab=t;
+  document.getElementById("gm-tab-rec").className="toggle-btn"+(t==="rec"?" active":"");
+  document.getElementById("gm-tab-manual").className="toggle-btn"+(t==="manual"?" active":"");
+  document.getElementById("gm-rec").style.display=t==="rec"?"block":"none";
+  document.getElementById("gm-manual").style.display=t==="manual"?"block":"none";
+}
+function updateRecSel(){
+  var id=document.getElementById("gm-rec-sel").value;
+  document.getElementById("gm-rec-fields").style.display=id?"block":"none";
+  if(id){
+    var r=S.recs.find(function(x){return +x.id===+id;});
+    if(r&&r.monto) document.getElementById("gm-rmonto").value=r.monto;
+  }
+}
+async function guardarGasto(){
+  var t=window._gastoTab;
+  var datos;
+  if(t==="rec"){
+    var recId=document.getElementById("gm-rec-sel").value;
+    if(!recId){toast("Selecciona un recurrente","err");return;}
+    var r=S.recs.find(function(x){return +x.id===+recId;});
+    var monto=+document.getElementById("gm-rmonto").value;
+    var nota=document.getElementById("gm-rnota").value;
+    if(!monto){toast("Ingresa el monto","err");return;}
+    datos={fecha:document.getElementById("gm-rfecha").value,concepto:r.concepto+(nota?" — "+nota:""),monto:monto,cat:r.cat,recId:r.id,comprobante:""};
+  } else {
+    var concepto=document.getElementById("gm-mconcepto").value;
+    var monto=+document.getElementById("gm-mmonto").value;
+    if(!concepto||!monto){toast("Completa los campos","err");return;}
+    datos={fecha:document.getElementById("gm-mfecha").value,concepto:concepto,monto:monto,cat:document.getElementById("gm-mcat").value,recId:"",comprobante:""};
+  }
+  var res=await apiPost("addGasto",datos);
+  if(res===null) return;
+  datos.id=res.id||nextId();
+  S.gastos.push(datos);
+  toast("Gasto registrado ✓","ok");
+  closeModal(); render();
+}
+
+// ═══════════════════════════════════════════════════════
+//  TAB REPORTES
+// ═══════════════════════════════════════════════════════
+function renderReportes(){
+  var secs=[
+    {fn:"openEstadisticas()",icon:"📊",label:"Estadísticas anuales",sub:"Ingresos, egresos, saldo y gráficas"},
+    {fn:"openDeudas()",icon:"🏠",label:"Estado de cuenta por depto",sub:"Quién debe y cuánto en el año"},
+    {fn:"openHistorial()",icon:"🗂️",label:"Carga histórica",sub:"Registrar pagos de meses pasados"},
+    {fn:"openExtras()",icon:"📌",label:"Cuotas extraordinarias",sub:"Cobros adicionales del mes actual"},
+  ];
+  var out='<h2 class="mb-4">Reportes</h2>';
+  secs.forEach(function(s){
+    out+='<button onclick="'+s.fn+'" class="card" style="width:100%;cursor:pointer;padding:16px;text-align:left;margin-bottom:10px;border:1px solid var(--slate100)">';
+    out+='<div class="row"><span style="font-size:1.6rem;width:40px;flex-shrink:0">'+s.icon+'</span>';
+    out+='<div style="flex:1"><p style="font-weight:700;color:var(--slate800)">'+s.label+'</p>';
+    out+='<p style="font-size:.78rem;color:var(--slate400);margin-top:3px">'+s.sub+'</p></div>';
+    out+='<span style="color:var(--slate300)">›</span></div></button>';
+  });
+  return out;
+}
+
+// ── Estadísticas ──────────────────────────────────────
+function openEstadisticas(){
+  var ano=S.ano;
+  var datos=MESES.map(function(label,i){
+    var m=mesKey(i,ano);
+    var ing=S.pagos.filter(function(p){return p.mes===m;}).reduce(function(s,p){return s+(+p.monto);},0);
+    var eg=S.gastos.filter(function(g){return g.fecha&&g.fecha.startsWith(m);}).reduce(function(s,g){return s+(+g.monto);},0);
+    return{mes:label.slice(0,3),ingresos:ing,egresos:eg,saldo:ing-eg};
+  });
+  var totIng=datos.reduce(function(s,d){return s+d.ingresos;},0);
+  var totEg=datos.reduce(function(s,d){return s+d.egresos;},0);
+  var saldoAnual=totIng-totEg;
+  var porCat={};
+  S.gastos.filter(function(g){return g.fecha&&g.fecha.startsWith(String(ano));}).forEach(function(g){porCat[g.cat]=(porCat[g.cat]||0)+(+g.monto);});
+
+  var out=backHeader("Estadísticas "+ano,"closePage()")+
+    '<div class="stats3 mb-4">'+
+    '<div class="grad grad-emerald"><div class="stat-label">Ingresos</div><div class="stat-val">'+fmt(totIng)+'</div></div>'+
+    '<div class="grad grad-rose"><div class="stat-label">Egresos</div><div class="stat-val">'+fmt(totEg)+'</div></div>'+
+    '<div class="grad '+(saldoAnual>=0?"grad-indigo":"grad-red")+'"><div class="stat-label">'+(saldoAnual>=0?"Saldo":"Déficit")+'</div><div class="stat-val">'+fmt(Math.abs(saldoAnual))+'</div></div>'+
+    '</div>'+
+    '<div class="card" style="padding:16px;margin-bottom:12px"><p style="font-weight:700;font-size:.85rem;margin-bottom:8px">Ingresos vs Egresos</p><div class="chart-wrap"><canvas id="chartBar"></canvas></div></div>'+
+    '<div class="card" style="padding:16px;margin-bottom:12px"><p style="font-weight:700;font-size:.85rem;margin-bottom:8px">Saldo mensual</p><div class="chart-mini"><canvas id="chartLine"></canvas></div></div>'+
+    (Object.keys(porCat).length>0?'<div class="card" style="padding:16px;margin-bottom:12px"><p style="font-weight:700;font-size:.85rem;margin-bottom:8px">Egresos por categoría</p><div style="display:flex;gap:12px;align-items:center"><div style="width:120px;height:120px;flex-shrink:0"><canvas id="chartPie"></canvas></div><div style="flex:1;font-size:.75rem">'+Object.keys(porCat).map(function(k,i){return '<div class="row-between mb-1"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:'+COLORES[i%COLORES.length]+';display:inline-block"></span>'+k+'</span><span style="font-weight:700">'+fmt(porCat[k])+'</span></div>';}).join("")+'</div></div></div>':"")+
+    '<div class="card" style="overflow:hidden;margin-bottom:12px"><div style="padding:12px 16px;border-bottom:1px solid var(--slate100)"><p style="font-weight:700;font-size:.85rem">Resumen mensual '+ano+'</p></div><div style="overflow-x:auto"><table><thead><tr><th>Mes</th><th class="tr">Ingresos</th><th class="tr">Egresos</th><th class="tr">Saldo</th></tr></thead><tbody>'+
+    datos.map(function(d,i){var e=d.ingresos===0&&d.egresos===0;return '<tr style="opacity:'+(e?.3:1)+'"><td>'+MESES[i]+'</td><td class="tr" style="color:var(--emerald);font-weight:700">'+(d.ingresos>0?fmt(d.ingresos):"—")+'</td><td class="tr" style="color:var(--rose);font-weight:700">'+(d.egresos>0?fmt(d.egresos):"—")+'</td><td class="tr" style="font-weight:800;color:'+(d.saldo>=0?"var(--brand)":"var(--rose)")+'">'+(e?"—":fmt(d.saldo))+'</td></tr>';}).join("")+
+    '</tbody><tfoot><tr><td style="font-weight:800">Total</td><td class="tr" style="color:var(--emerald);font-weight:800">'+fmt(totIng)+'</td><td class="tr" style="color:var(--rose);font-weight:800">'+fmt(totEg)+'</td><td class="tr" style="font-weight:900;color:'+(saldoAnual>=0?"var(--brand)":"var(--rose)")+'">'+fmt(saldoAnual)+'</td></tr></tfoot></table></div></div>';
+
+  openPage(out);
+
+  // Init charts after DOM
+  setTimeout(function(){
+    if(chartBar){chartBar.destroy();chartBar=null;}
+    if(chartLine){chartLine.destroy();chartLine=null;}
+    if(chartPie){chartPie.destroy();chartPie=null;}
+    var bc=document.getElementById("chartBar");
+    if(bc) chartBar=new Chart(bc,{type:"bar",data:{labels:datos.map(function(d){return d.mes;}),datasets:[{label:"Ingresos",data:datos.map(function(d){return d.ingresos;}),backgroundColor:"#6366f1",borderRadius:4},{label:"Egresos",data:datos.map(function(d){return d.egresos;}),backgroundColor:"#ef4444",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:"#f1f5f9"},ticks:{font:{size:9},callback:function(v){return "$"+(v/1000).toFixed(0)+"k";}}}}}});
+    var lc=document.getElementById("chartLine");
+    if(lc) chartLine=new Chart(lc,{type:"line",data:{labels:datos.map(function(d){return d.mes;}),datasets:[{label:"Saldo",data:datos.map(function(d){return d.saldo;}),borderColor:"#6366f1",backgroundColor:"rgba(99,102,241,.1)",borderWidth:2,fill:true,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:"#f1f5f9"},ticks:{font:{size:9},callback:function(v){return "$"+(v/1000).toFixed(0)+"k";}}}}}});
+    var pc=document.getElementById("chartPie");
+    if(pc&&Object.keys(porCat).length>0) chartPie=new Chart(pc,{type:"doughnut",data:{labels:Object.keys(porCat),datasets:[{data:Object.values(porCat),backgroundColor:COLORES,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:"55%"}});
+  },50);
+}
+
+// ── Deudas ────────────────────────────────────────────
+function openDeudas(){
+  var ano=S.ano;
+  var dp=depsPagables();
+  var deudas=dp.map(function(d){
+    var deuda=0;
+    for(var i=0;i<12;i++){
+      var m=mesKey(i,ano);
+      var pago=S.pagos.find(function(p){return +p.depId===+d.id&&(p.mes===m||(p.tipo==="anual"&&p.mesesAnuales&&String(p.mesesAnuales).indexOf(m)>=0));});
+      if(!pago){var ext=S.extras.filter(function(e){return e.mes===m;}).reduce(function(s,e){return s+(+e.monto);},0);deuda+=cuotaBase()+ext;}
+    }
+    deuda+=totalAdeudo(d.id);
+    return Object.assign({},d,{deuda:deuda});
+  }).sort(function(a,b){return b.deuda-a.deuda;});
+  var total=deudas.reduce(function(s,d){return s+d.deuda;},0);
+
+  var out=backHeader("Estado de cuenta "+ano,"closePage()")+
+    (total>0?'<div class="row-between mb-3"><p style="font-size:.82rem;color:var(--slate500)">'+deudas.filter(function(d){return d.deuda===0;}).length+' al corriente</p><span class="badge bg-red">Deuda total: '+fmt(total)+'</span></div>':"")+
+    (total===0?'<div style="text-align:center;padding:60px 20px"><p style="font-size:2rem;margin-bottom:12px">🎉</p><p style="font-weight:700;color:var(--slate700)">Todos al corriente en '+ano+'</p></div>':"")+
+    (total>0?'<div class="card"><div class="divide">'+
+    deudas.map(function(d){
+      return '<div class="item"><div class="item-avatar" style="background:'+(d.deuda===0?"#d1fae5":"#fee2e2")+';color:'+(d.deuda===0?"#065f46":"#991b1b")+'">'+d.num+'</div>'+
+        '<div class="item-body"><div class="name">'+d.nombre+'</div><div class="sub">Depto '+d.num+'</div></div>'+
+        (d.deuda===0?'<span class="badge bg-green">Al corriente</span>':'<span style="font-weight:800;color:var(--rose)">'+fmt(d.deuda)+'</span>')+
+        '</div>';
+    }).join("")+'</div></div>':"");
+
+  openPage(out);
+}
+
+// ── Historial ─────────────────────────────────────────
+function openHistorial(){
+  var anos=[new Date().getFullYear()-1,new Date().getFullYear()];
+  var out=backHeader("Carga histórica","closePage()")+
+    '<p class="text-sm text-slate mb-4">Registra pagos de meses pasados de forma masiva.</p>'+
+    '<div class="card" style="padding:16px">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
+    '<div><label style="font-size:.75rem;font-weight:600;color:var(--slate600);display:block;margin-bottom:4px">Mes</label>'+
+    '<select class="sel" id="h-mes">'+MESES.map(function(m,i){return '<option value="'+i+'" '+(i===S.mesIdx?"selected":"")+'>'+m+'</option>';}).join("")+'</select></div>'+
+    '<div><label style="font-size:.75rem;font-weight:600;color:var(--slate600);display:block;margin-bottom:4px">Año</label>'+
+    '<select class="sel" id="h-ano">'+anos.map(function(a){return '<option '+(a===S.ano?"selected":"")+'>'+a+'</option>';}).join("")+'</select></div>'+
+    '</div>'+
+    '<button class="btn btn-primary btn-lg" onclick="iniciarHistorial()">Cargar mes →</button>'+
+    '</div>'+
+    '<div class="info-box mt-3"><p style="font-size:.72rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Cómo funciona</p>'+
+    '<p style="font-size:.75rem;color:#3730a3">• Solo aparecen deptos sin pago en ese mes<br>• Marca quién pagó y ajusta fecha y monto<br>• El sistema aplica descuentos y penas automáticamente<br>• Repite para cada mes que necesites cargar</p></div>';
+  openPage(out);
+}
+
+function iniciarHistorial(){
+  var mesIdx=+document.getElementById("h-mes").value;
+  var ano=+document.getElementById("h-ano").value;
+  var m=mesKey(mesIdx,ano);
+  var dp=depsPagables();
+  var sinPago=dp.filter(function(d){
+    return !S.pagos.some(function(p){return +p.depId===+d.id&&(p.mes===m||(p.tipo==="anual"&&p.mesesAnuales&&String(p.mesesAnuales).indexOf(m)>=0));});
+  });
+  var prefijo=ano+"-"+String(mesIdx+1).padStart(2,"0");
+  var cb=cuotaBase();
+
+  var rows=sinPago.map(function(d,i){
+    return '<div id="hrow-'+d.id+'" class="item" style="flex-wrap:wrap">'+
+      '<input type="checkbox" id="hck-'+d.id+'" onchange="toggleHistRow('+d.id+')" style="width:18px;height:18px;accent-color:var(--brand);flex-shrink:0;cursor:pointer">'+
+      '<div style="flex:1;min-width:0"><p style="font-size:.82rem;font-weight:600">'+d.nombre+'</p><p style="font-size:.7rem;color:var(--slate400)">Depto '+d.num+'</p></div>'+
+      '<div id="hfields-'+d.id+'" style="display:none;width:100%;margin-top:8px;display:none">'+
+      '<div style="display:grid;grid-template-columns:1fr auto;gap:8px">'+
+      '<input type="date" id="hfecha-'+d.id+'" value="'+prefijo+'-05" class="inp" style="font-size:.78rem;padding:6px 8px">'+
+      '<input type="number" id="hmonto-'+d.id+'" value="'+cb+'" class="inp" style="width:90px;font-size:.78rem;padding:6px 8px">'+
+      '</div></div></div>';
+  }).join("");
+
+  var out=backHeader(MESES[mesIdx]+" "+ano,"openHistorial()")+
+    '<div class="row mb-3" style="gap:8px">'+
+    '<button class="btn btn-ghost btn-sm" onclick="selHistTodos(true)">✓ Todos</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="selHistTodos(false)">✗ Ninguno</button>'+
+    '<span class="text-xs text-slate ml-auto" id="h-count">'+sinPago.length+' sin pago</span></div>'+
+    (sinPago.length===0?'<p class="empty">Todos los deptos ya tienen pago en este mes</p>':
+    '<div class="card"><div class="divide" id="h-list">'+rows+'</div></div>'+
+    '<button class="btn btn-success btn-lg mt-3" id="h-guardar" onclick="guardarHistorial(\''+m+'\','+mesIdx+')" style="display:none">Guardar pagos →</button>');
+
+  openPage(out);
+  window._histDeps=sinPago;
+}
+
+function toggleHistRow(id){
+  var ck=document.getElementById("hck-"+id);
+  var row=document.getElementById("hrow-"+id);
+  var fields=document.getElementById("hfields-"+id);
+  var checked=ck&&ck.checked;
+  if(row) row.style.background=checked?"#f0fdf4":"";
+  if(fields) fields.style.display=checked?"block":"none";
+  updateHistCount();
+}
+function selHistTodos(v){
+  (window._histDeps||[]).forEach(function(d){
+    var ck=document.getElementById("hck-"+d.id);
+    if(ck){ck.checked=v;toggleHistRow(d.id);}
+  });
+}
+function updateHistCount(){
+  var cnt=(window._histDeps||[]).filter(function(d){var c=document.getElementById("hck-"+d.id);return c&&c.checked;}).length;
+  var el=document.getElementById("h-count");
+  if(el) el.textContent=cnt+" seleccionados";
+  var btn=document.getElementById("h-guardar");
+  if(btn) btn.style.display=cnt>0?"block":"none";
+  if(btn) btn.textContent="Guardar "+cnt+" pagos →";
+}
+
+async function guardarHistorial(m,mesIdx){
+  var seleccionados=(window._histDeps||[]).filter(function(d){var c=document.getElementById("hck-"+d.id);return c&&c.checked;});
+  if(!seleccionados.length){toast("Marca al menos un depto","err");return;}
+  var guardados=0;
+  for(var i=0;i<seleccionados.length;i++){
+    var d=seleccionados[i];
+    var fecha=document.getElementById("hfecha-"+d.id).value;
+    var monto=+document.getElementById("hmonto-"+d.id).value;
+    var dd=diaNum(fecha);
+    var cb=cuotaBase();
+    var desc=dd<=DIAS_DESC?Math.round(cb*PCT):0;
+    var penaGen=dd>DIAS_PENA?Math.round(cb*PCT):0;
+    var datos={depId:+d.id,mes:m,fecha:fecha,monto:monto,tipo:"mensual",descuento:desc,penaGenerada:penaGen,parcial:false,diferencia:0,nota:"Registro histórico",mesesAnuales:""};
+    var res=await apiPost("addPago",datos);
+    if(res!==null){datos.id=res.id||nextId();S.pagos.push(datos);guardados++;}
+    if(penaGen>0){
+      var pd={depId:+d.id,monto:penaGen,origen:m};
+      var pr=await apiPost("addPena",pd);pd.id=pr&&pr.id?pr.id:nextId();S.penas.push(pd);
+    }
+  }
+  toast(guardados+" pagos guardados ✓","ok");
+  openHistorial();
+}
+
+// ── Extras ────────────────────────────────────────────
+function openExtras(){
+  var m=mk();
+  var extsMes=S.extras.filter(function(e){return e.mes===m;});
+  var total=extsMes.reduce(function(s,e){return s+(+e.monto);},0);
+
+  var lista=extsMes.length===0?'<p class="empty">Sin cuotas extraordinarias este mes</p>':
+    '<div class="card"><div class="divide">'+
+    extsMes.map(function(e){return '<div class="item"><span style="font-size:1.2rem">📌</span><div class="item-body"><div class="name">'+e.concepto+'</div></div><span style="font-weight:800;color:var(--amber)">'+fmt(+e.monto)+'</span><button onclick="borrarExtra(\''+e.id+'\')" style="background:none;border:none;color:var(--rose);font-size:1.2rem;cursor:pointer;margin-left:4px">&#215;</button></div>';}).join("")+
+    '</div><div class="row-between" style="padding:12px 16px;background:var(--slate50);border-top:1px solid var(--slate100)"><span style="font-weight:700;font-size:.85rem">Total por depto</span><span style="font-weight:800;color:var(--amber)">'+fmt(total)+'</span></div></div>';
+
+  var out=backHeader("Cuotas extraordinarias","closePage()")+
+    '<p class="text-sm text-slate mb-4">Se suman a la cuota de todos los deptos en el mes seleccionado.</p>'+
+    '<div class="card" style="padding:16px;margin-bottom:12px">'+
+    '<div class="field"><label>Concepto</label><input type="text" class="inp" id="ex-concepto" placeholder="Ej. Reparación de techo"></div>'+
+    '<div class="field"><label>Monto por depto ($)</label><input type="number" class="inp" id="ex-monto"></div>'+
+    '<button class="btn btn-amber btn-lg" onclick="guardarExtra()">+ Agregar cuota extraordinaria</button></div>'+
+    lista;
+  openPage(out);
+}
+async function guardarExtra(){
+  var concepto=document.getElementById("ex-concepto").value;
+  var monto=+document.getElementById("ex-monto").value;
+  if(!concepto||!monto){toast("Completa los campos","err");return;}
+  var datos={mes:mk(),concepto:concepto,monto:monto,fecha:HOY_STR};
+  var res=await apiPost("addExtra",datos);
+  if(res===null) return;
+  datos.id=res.id||nextId();
+  S.extras.push(datos);
+  toast("Cuota extraordinaria agregada ✓","ok");
+  openExtras();
+}
+async function borrarExtra(id){
+  if(!confirm("¿Eliminar esta cuota extraordinaria?")) return;
+  await apiPost("deleteExtra",{id:id});
+  S.extras=S.extras.filter(function(e){return String(e.id)!==String(id);});
+  toast("Eliminada","ok");
+  openExtras();
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONFIGURACIÓN
+// ═══════════════════════════════════════════════════════
+function openCfg(){
+  var cb=cuotaBase();
+  var ap=(S.saldoApert.find(function(s){return +s.ano===S.ano;})||{monto:0});
+  var secs=[
+    {fn:"openCfgCuota()",icon:"💰",label:"Cuota de mantenimiento",sub:"Vigente: "+fmt(cb)+"/mes"},
+    {fn:"openCfgSaldo()",icon:"🏦",label:"Saldo de apertura",sub:S.ano+": "+(ap.monto>0?fmt(ap.monto):"No configurado")},
+    {fn:"openCfgResidentes()",icon:"👥",label:"Residentes",sub:"Editar nombres y acuerdos de pago"},
+    {fn:"openCfgRecs()",icon:"📅",label:"Gastos recurrentes",sub:"Montos de limpieza, vigilancia, elevador…"},
+    {fn:"openCfgAdmin()",icon:"🔑",label:"Administrador",sub:"Depto exento de cuota ordinaria"},
+    {fn:"openCfgApi()",icon:"🔗",label:"URL de Google Sheets",sub:API_URL?"Conectado ✓":"No configurado"},
+  ];
+  var html=modalHeader("Configuración")+
+    '<div class="space-y">'+
+    secs.map(function(s){
+      return '<button onclick="closeModal();'+s.fn+'" style="width:100%;background:#fff;border:1px solid var(--slate100);border-radius:var(--r);padding:14px 16px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .15s" onmouseover="this.style.borderColor=\'#a5b4fc\'" onmouseout="this.style.borderColor=\'var(--slate100)\'">'+'<div style="width:44px;height:44px;background:var(--brand-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">'+s.icon+'</div>'+
+      '<div style="flex:1"><p style="font-weight:700;font-size:.9rem;color:var(--slate800)">'+s.label+'</p><p style="font-size:.75rem;color:var(--slate400);margin-top:2px">'+s.sub+'</p></div><span style="color:var(--slate300)">›</span></button>';
+    }).join("")+
+    '</div></div>';
+  openModal(html);
+}
+
+// ── Cuota ─────────────────────────────────────────────
+function openCfgCuota(){
+  var hist=S.cuotaHist.slice().reverse();
+  var histHtml=hist.length>1?'<div class="card" style="padding:14px;margin-bottom:12px"><p style="font-size:.7rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Historial</p>'+
+    hist.slice(1).map(function(c){return '<div class="row-between text-sm mb-1"><span style="font-weight:700">'+fmt(+c.monto)+'</span><span class="text-slate">'+c.nota+'</span><span class="text-slate">'+c.desde+'</span></div>';}).join("")+'</div>':"";
+  var out=backHeader("Cuota de mantenimiento","openCfg()")+
+    '<div class="card" style="padding:20px;text-align:center;margin-bottom:12px">'+
+    '<p style="font-size:.7rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em">Cuota vigente</p>'+
+    '<p style="font-size:2.5rem;font-weight:900;color:var(--brand-dark);margin-top:4px">'+fmt(cuotaBase())+'</p>'+
+    '<p style="font-size:.75rem;color:var(--slate400);margin-top:4px">/mes · desde '+(S.cuotaHist[S.cuotaHist.length-1]||{}).desde+'</p></div>'+
+    histHtml+
+    '<div class="card" style="padding:16px">'+
+    '<p style="font-size:.7rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Actualizar cuota</p>'+
+    '<div class="field"><label>Nuevo monto ($)</label><input type="number" class="inp" id="cfg-cuota-monto" placeholder="'+cuotaBase()+'"></div>'+
+    '<div class="field"><label>Razón del ajuste</label><input type="text" class="inp" id="cfg-cuota-nota" placeholder="Ej. Ajuste inflación 2027"></div>'+
+    '<button class="btn btn-primary btn-lg" onclick="guardarCuota()">Confirmar nueva cuota</button></div>';
+  openPage(out);
+}
+async function guardarCuota(){
+  var monto=+document.getElementById("cfg-cuota-monto").value;
+  var nota=document.getElementById("cfg-cuota-nota").value||"Actualización";
+  if(!monto||monto===cuotaBase()){toast("Ingresa un monto diferente","err");return;}
+  var datos={monto:monto,desde:HOY_STR,nota:nota};
+  var res=await apiPost("addCuota",datos);
+  if(res===null) return;
+  S.cuotaHist.push(datos);
+  toast("Cuota actualizada a "+fmt(monto)+" ✓","ok");
+  openCfgCuota();
+}
+
+// ── Saldo apertura ────────────────────────────────────
+function openCfgSaldo(){
+  var anos=[new Date().getFullYear()-1,new Date().getFullYear(),new Date().getFullYear()+1];
+  renderCfgSaldo(S.ano);
+}
+function renderCfgSaldo(anoSel){
+  var anos=[new Date().getFullYear()-1,new Date().getFullYear(),new Date().getFullYear()+1];
+  var actual=S.saldoApert.find(function(s){return +s.ano===+anoSel;});
+  var hist=S.saldoApert.slice().sort(function(a,b){return +b.ano-+a.ano;});
+
+  var out=backHeader("Saldo de apertura","openCfg()")+
+    '<p class="text-sm text-slate mb-4">El dinero real con que inicia el edificio cada año. Base para calcular el saldo en caja del Inicio.</p>'+
+    '<div style="display:flex;gap:8px;margin-bottom:16px">'+
+    anos.map(function(a){return '<button onclick="renderCfgSaldo('+a+')" style="flex:1;padding:10px;border:2px solid '+(+a===+anoSel?"var(--brand)":"var(--slate200)")+';border-radius:var(--rs);font-weight:700;font-size:.85rem;cursor:pointer;background:'+(+a===+anoSel?"var(--brand-light)":"#fff")+';color:'+(+a===+anoSel?"var(--brand)":"var(--slate600)")+'">'+a+'</button>';}).join("")+
+    '</div>'+
+    (actual?
+      '<div class="card" style="padding:20px;text-align:center;margin-bottom:12px">'+
+      '<p style="font-size:.7rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em">Saldo registrado '+anoSel+'</p>'+
+      '<p style="font-size:2.2rem;font-weight:900;color:var(--brand-dark);margin-top:4px">'+fmt(+actual.monto)+'</p>'+
+      (actual.nota?'<p style="font-size:.75rem;color:var(--slate400);margin-top:4px">'+actual.nota+'</p>':"")+
+      '<button onclick="borrarSaldoApert('+anoSel+')" style="margin-top:10px;font-size:.75rem;color:var(--rose);font-weight:600;background:none;border:none;cursor:pointer">Eliminar y recapturar</button></div>'
+    :
+      '<div class="warn-box mb-4"><p style="font-size:.8rem;font-weight:700">Sin saldo de apertura para '+anoSel+'</p><p style="font-size:.75rem;margin-top:4px">Sin este dato el saldo en caja muestra solo ingresos − egresos del año.</p></div>'+
+      '<div class="card" style="padding:16px;margin-bottom:12px">'+
+      '<div class="field"><label>Saldo al 1 de enero de '+anoSel+' ($)</label><input type="number" class="inp" id="sa-monto" placeholder="Ej. 24500"></div>'+
+      '<div class="field"><label>Nota (opcional)</label><input type="text" class="inp" id="sa-nota" placeholder="Saldo al 1 de enero de '+anoSel+'"></div>'+
+      '<button class="btn btn-primary btn-lg" onclick="guardarSaldoApert('+anoSel+')">Guardar saldo de apertura</button></div>'
+    )+
+    (hist.length>0?'<div class="card" style="padding:14px"><p style="font-size:.7rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Historial</p>'+
+    hist.map(function(s){return '<div class="row-between text-sm mb-1"><span style="font-weight:700">'+s.ano+'</span><span class="text-slate">'+s.nota+'</span><span style="font-weight:800;color:var(--brand)">'+fmt(+s.monto)+'</span></div>';}).join("")+'</div>':"");
+
+  openPage(out);
+}
+async function guardarSaldoApert(ano){
+  var monto=+document.getElementById("sa-monto").value;
+  var nota=document.getElementById("sa-nota").value||"Saldo al 1 de enero de "+ano;
+  if(!monto){toast("Ingresa el monto","err");return;}
+  var datos={ano:+ano,monto:monto,nota:nota};
+  var res=await apiPost("setSaldoApert",datos);
+  if(res===null) return;
+  S.saldoApert=S.saldoApert.filter(function(s){return +s.ano!==+ano;});
+  S.saldoApert.push(datos);
+  toast("Saldo de apertura guardado ✓","ok");
+  renderCfgSaldo(ano);
+}
+async function borrarSaldoApert(ano){
+  if(!confirm("¿Eliminar saldo de apertura de "+ano+"?")) return;
+  await apiPost("deleteSaldoApert",{ano:ano});
+  S.saldoApert=S.saldoApert.filter(function(s){return +s.ano!==+ano;});
+  toast("Eliminado","ok");
+  renderCfgSaldo(ano);
+}
+
+// ── Residentes ────────────────────────────────────────
+function openCfgResidentes(busq){
+  busq=busq||"";
+  var filtrados=busq?S.deptos.filter(function(d){var q=busq.toLowerCase();return d.nombre.toLowerCase().indexOf(q)>=0||d.num.indexOf(q)>=0;}):S.deptos;
+  var out=backHeader("Residentes","openCfg()")+
+    '<p class="text-sm text-slate mb-3">Toca un depto para editar nombre o gestionar su acuerdo de pago.</p>'+
+    '<div class="field"><input type="text" class="inp" id="res-busq" value="'+busq+'" placeholder="Buscar por nombre o número…" oninput="openCfgResidentes(this.value)"></div>'+
+    '<div class="card"><div class="divide">'+
+    filtrados.map(function(d){
+      var esAdmin=+d.id===adminId();
+      var ac=acuerdoActivo(d.id);
+      var ad=totalAdeudo(d.id);
+      var bgColor=esAdmin?"#e0e7ff":(ac?"#dbeafe":(ad>0?"#fee2e2":"#f1f5f9"));
+      var fgColor=esAdmin?"#3730a3":(ac?"#1e40af":(ad>0?"#991b1b":"#475569"));
+      var sub="Depto "+d.num+(esAdmin?" · Administrador":"")+(ac?" · 🤝 Acuerdo activo":"")+(ad>0&&!esAdmin?" · Adeudo "+fmt(ad):"");
+      return '<button onclick="openEditResidente('+d.id+')" style="width:100%;padding:14px 16px;display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;text-align:left;transition:background .15s" onmouseover="this.style.background=\'var(--slate50)\'" onmouseout="this.style.background=\'none\'">'+'<div style="width:40px;height:40px;border-radius:50%;background:'+bgColor+';color:'+fgColor+';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0">'+d.num+'</div>'+
+      '<div style="flex:1;min-width:0"><p style="font-weight:700;font-size:.85rem;color:var(--slate800)">'+d.nombre+'</p><p style="font-size:.7rem;color:var(--slate500);margin-top:2px">'+sub+'</p></div><span style="color:var(--slate300)">&#9998;</span></button>';
+    }).join("")+'</div></div>';
+  openPage(out);
+}
+
+function openEditResidente(depId){
+  var d=S.deptos.find(function(x){return +x.id===+depId;});
+  if(!d) return;
+  var ac=acuerdoActivo(depId);
+  var ad=totalAdeudo(depId);
+  var adList=adeudosDep(depId).concat(penasDep(depId).map(function(p){return Object.assign({},p,{nota:"Pena convencional"});}));
+
+  var out=backHeader("Depto "+d.num+" — "+d.nombre,"openCfgResidentes()")+
+    '<div class="card" style="padding:16px;margin-bottom:12px">'+
+    '<p style="font-size:.7rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Nombre del residente</p>'+
+    '<div class="field"><label>Nombre actual</label><input type="text" class="inp" id="er-nombre" value="'+d.nombre+'"></div>'+
+    '<button class="btn btn-primary btn-lg" onclick="guardarNombreResidente('+depId+')">Guardar nombre</button></div>'+
+
+    '<div class="card" style="padding:16px;margin-bottom:12px">'+
+    '<p style="font-size:.7rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Acuerdo de pago</p>'+
+    (ad>0?'<div class="danger-box mb-3" style="font-size:.78rem"><p style="font-weight:700">Adeudo total: '+fmt(ad)+'</p>'+adList.map(function(a){return '<p style="margin-top:4px;opacity:.8">'+fmt(+a.monto)+(a.nota?" — "+a.nota:"")+'</p>';}).join("")+'</div>':"")+
+    '<div style="border:2px solid '+(ac?"#60a5fa":"var(--slate200)")+';border-radius:var(--r);padding:14px;background:'+(ac?"#eff6ff":"#fff")+';display:flex;align-items:flex-start;justify-content:space-between;gap:12px">'+
+    '<div><p style="font-weight:700;font-size:.85rem;color:'+(ac?"#1e40af":"var(--slate700)")+'">'+(ac?"🤝 Acuerdo activo":"Sin acuerdo de pago")+'</p>'+
+    '<p style="font-size:.72rem;margin-top:4px;color:'+(ac?"#2563eb":"var(--slate400)")+'">'+
+    (ac?"Se respeta el descuento pronto pago aunque tenga adeudos.":"Con adeudos, el descuento no aplica automáticamente.")+
+    '</p></div>'+
+    '<button class="btn '+(ac?"btn-ghost":"btn-primary")+' btn-sm" style="flex-shrink:0" onclick="toggleAcuerdo('+depId+')">'+(ac?"Desactivar":"Activar")+'</button></div></div>'+
+
+    '<div class="card" style="padding:16px;margin-bottom:12px">'+
+    '<div class="row-between mb-3">'+
+    '<p style="font-size:.7rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.05em">Adeudo inicial heredado</p>'+
+    '<button onclick="openAddAdeudoInicial('+depId+')" style="font-size:.75rem;font-weight:700;color:var(--brand);background:none;border:none;cursor:pointer">+ Agregar</button></div>'+
+    '<p style="font-size:.75rem;color:var(--slate400);margin-bottom:10px">Para registrar adeudos de años anteriores sin cargar todo el historial.</p>'+
+    (adeudosDep(depId).filter(function(a){return a.tipo==="inicial";}).length===0?
+      '<p style="font-size:.78rem;color:var(--slate400);text-align:center;padding:12px">Sin adeudo inicial registrado</p>':
+      adeudosDep(depId).filter(function(a){return a.tipo==="inicial";}).map(function(a){
+        return '<div style="display:flex;align-items:center;gap:10px;background:#fee2e2;border-radius:10px;padding:10px 12px;margin-bottom:6px">'+
+          '<div style="flex:1"><p style="font-weight:700;color:var(--rose);font-size:.85rem">'+fmt(+a.monto)+'</p>'+
+          '<p style="font-size:.7rem;color:#9f1239">'+a.nota+'</p></div>'+
+          '<button onclick="borrarAdeudoInicial(\''+a.id+'\','+depId+')" style="background:none;border:none;color:var(--rose);font-size:1.2rem;cursor:pointer">&#215;</button></div>';
+      }).join("")
+    )+'</div>';
+
+  openPage(out);
+}
+
+async function guardarNombreResidente(depId){
+  var nombre=document.getElementById("er-nombre").value.trim();
+  if(!nombre){toast("Ingresa un nombre","err");return;}
+  var d=S.deptos.find(function(x){return +x.id===+depId;});
+  var datos={id:+depId,num:d.num,nombre:nombre};
+  var res=await apiPost("editDepto",datos);
+  if(res===null) return;
+  S.deptos=S.deptos.map(function(x){return +x.id===+depId?datos:x;});
+  toast("Nombre actualizado ✓","ok");
+  openEditResidente(depId);
+}
+
+async function toggleAcuerdo(depId){
+  var actual=acuerdoActivo(depId);
+  var datos={depId:+depId,activo:!actual};
+  var res=await apiPost("setAcuerdo",datos);
+  if(res===null) return;
+  var idx=S.acuerdos.findIndex(function(a){return +a.depId===+depId;});
+  if(idx>=0) S.acuerdos[idx]=Object.assign({},S.acuerdos[idx],datos);
+  else S.acuerdos.push(Object.assign({id:nextId()},datos));
+  toast((datos.activo?"Acuerdo activado":"Acuerdo desactivado")+" ✓","ok");
+  openEditResidente(depId);
+}
+
+function openAddAdeudoInicial(depId){
+  openModal(modalHeader("Adeudo inicial — Depto "+depId)+
+    '<p class="text-sm text-slate mb-4">Para registrar adeudos de años anteriores sin cargar todo el historial.</p>'+
+    '<div class="field"><label>Monto del adeudo ($)</label><input type="number" class="inp" id="ai-monto" placeholder="Ej. 8500"></div>'+
+    '<div class="field"><label>Nota explicativa</label><input type="text" class="inp" id="ai-nota" value="Adeudo acumulado a dic 2025"></div>'+
+    '<div class="row" style="gap:8px;margin-top:4px"><button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-danger" style="flex:2" onclick="guardarAdeudoInicial('+depId+')">Registrar adeudo</button></div>'+
+    '</div>'
+  );
+}
+async function guardarAdeudoInicial(depId){
+  var monto=+document.getElementById("ai-monto").value;
+  var nota=document.getElementById("ai-nota").value||"Adeudo acumulado";
+  if(!monto||monto<=0){toast("Ingresa un monto válido","err");return;}
+  var datos={depId:+depId,monto:monto,origen:"inicial",tipo:"inicial",nota:nota};
+  var res=await apiPost("addAdeudo",datos);
+  if(res===null) return;
+  datos.id=res.id||nextId();
+  S.adeudos.push(datos);
+  toast("Adeudo registrado ✓","ok");
+  closeModal(); openEditResidente(depId);
+}
+async function borrarAdeudoInicial(id,depId){
+  if(!confirm("¿Eliminar este adeudo?")) return;
+  await apiPost("deleteAdeudo",{id:id});
+  S.adeudos=S.adeudos.filter(function(a){return String(a.id)!==String(id);});
+  toast("Eliminado","ok");
+  openEditResidente(depId);
+}
+
+// ── Recurrentes ───────────────────────────────────────
+function openCfgRecs(){
+  var out=backHeader("Gastos recurrentes","openCfg()")+
+    '<p class="text-sm text-slate mb-3">Toca uno para editar el monto o la frecuencia.</p>'+
+    '<div class="card"><div class="divide">'+
+    S.recs.map(function(r){
+      return '<button onclick="openEditRec('+r.id+')" style="width:100%;padding:14px 16px;display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;text-align:left" onmouseover="this.style.background=\'var(--slate50)\'" onmouseout="this.style.background=\'none\'">'+'<span style="font-size:1.4rem">'+FREC_ICON[r.frec]+'</span>'+
+      '<div style="flex:1;min-width:0"><p style="font-weight:700;font-size:.85rem;color:var(--slate800)">'+r.concepto+'</p><p style="font-size:.72rem;color:var(--slate400);margin-top:2px">'+FREC_LABEL[r.frec]+'</p>'+(r.notas?'<p style="font-size:.68rem;color:var(--slate300);font-style:italic">'+r.notas+'</p>':"")+
+      '</div><div style="text-align:right"><p style="font-weight:800;color:var(--slate800)">'+( r.variable?"Variable":fmt(r.monto))+'</p><p style="font-size:.7rem;color:var(--brand);margin-top:2px">Editar ›</p></div></button>';
+    }).join("")+'</div></div>'+
+    '<button class="btn btn-outline btn-full mt-3" onclick="openNuevoRec()">+ Agregar nuevo recurrente</button>';
+  openPage(out);
+}
+
+function openEditRec(id){
+  var r=S.recs.find(function(x){return +x.id===+id;});
+  if(!r) return;
+  var cats=["Mantenimiento","Jardinería","Servicios","Reparaciones","Limpieza","Seguridad","Otros"];
+  var frecs=["semanal","quincenal","mensual","bimestral"];
+  openModal(modalHeader("Editar — "+r.concepto)+
+    '<div class="field"><label>Concepto</label><input type="text" class="inp" id="er-c" value="'+r.concepto+'"></div>'+
+    '<div class="field"><label>Categoría</label><select class="sel" id="er-cat">'+cats.map(function(c){return '<option '+(c===r.cat?"selected":"")+'>'+c+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label>Frecuencia</label><select class="sel" id="er-frec">'+frecs.map(function(f){return '<option '+(f===r.frec?"selected":"")+'>'+f+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label><input type="checkbox" id="er-var" '+(r.variable?"checked":"")+' style="accent-color:var(--brand);width:15px;height:15px;margin-right:6px">Monto variable (capturar cada vez)</label></div>'+
+    '<div class="field" id="er-mwrap"><label>Monto base ($)</label><input type="number" class="inp" id="er-m" value="'+(r.monto||"")+'"></div>'+
+    '<div class="field"><label>Notas</label><input type="text" class="inp" id="er-n" value="'+(r.notas||"")+'" placeholder="Aumenta cada enero…"></div>'+
+    '<div class="row" style="gap:8px;margin-top:4px">'+
+    '<button class="btn btn-danger btn-sm" onclick="borrarRec('+id+')">Eliminar</button>'+
+    '<button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-primary" style="flex:1" onclick="guardarRec('+id+')">Guardar</button></div>'+
+    '</div>'
+  );
+  document.getElementById("er-var").addEventListener("change",function(){
+    document.getElementById("er-mwrap").style.display=this.checked?"none":"block";
+  });
+  document.getElementById("er-mwrap").style.display=r.variable?"none":"block";
+}
+async function guardarRec(id){
+  var variable=document.getElementById("er-var").checked;
+  var datos={id:+id,concepto:document.getElementById("er-c").value,cat:document.getElementById("er-cat").value,frec:document.getElementById("er-frec").value,monto:variable?"":+document.getElementById("er-m").value||"",variable:variable,notas:document.getElementById("er-n").value};
+  var res=await apiPost("editRec",datos);
+  if(res===null) return;
+  S.recs=S.recs.map(function(r){return +r.id===+id?datos:r;});
+  toast("Guardado ✓","ok");
+  closeModal(); openCfgRecs();
+}
+async function borrarRec(id){
+  if(!confirm("¿Eliminar este recurrente?")) return;
+  await apiPost("deleteRec",{id:id});
+  S.recs=S.recs.filter(function(r){return +r.id!==+id;});
+  toast("Eliminado","ok");
+  closeModal(); openCfgRecs();
+}
+function openNuevoRec(){
+  var cats=["Mantenimiento","Jardinería","Servicios","Reparaciones","Limpieza","Seguridad","Otros"];
+  var frecs=["semanal","quincenal","mensual","bimestral"];
+  openModal(modalHeader("Nuevo recurrente")+
+    '<div class="field"><label>Concepto</label><input type="text" class="inp" id="nr-c" placeholder="Ej. Jardinería"></div>'+
+    '<div class="field"><label>Categoría</label><select class="sel" id="nr-cat">'+cats.map(function(c){return '<option>'+c+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label>Frecuencia</label><select class="sel" id="nr-frec">'+frecs.map(function(f){return '<option>'+f+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label><input type="checkbox" id="nr-var" style="accent-color:var(--brand);width:15px;height:15px;margin-right:6px" onchange="document.getElementById(\'nr-mwrap\').style.display=this.checked?\'none\':\'block\'">Monto variable</label></div>'+
+    '<div class="field" id="nr-mwrap"><label>Monto base ($)</label><input type="number" class="inp" id="nr-m"></div>'+
+    '<div class="field"><label>Notas</label><input type="text" class="inp" id="nr-n" placeholder="Ej. Aumenta cada enero"></div>'+
+    '<div class="row" style="gap:8px;margin-top:4px"><button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-primary" style="flex:1" onclick="guardarNuevoRec()">Agregar</button></div>'+
+    '</div>'
+  );
+}
+async function guardarNuevoRec(){
+  var concepto=document.getElementById("nr-c").value.trim();
+  if(!concepto){toast("Ingresa el concepto","err");return;}
+  var variable=document.getElementById("nr-var").checked;
+  var datos={concepto:concepto,cat:document.getElementById("nr-cat").value,frec:document.getElementById("nr-frec").value,monto:variable?"":+document.getElementById("nr-m").value||"",variable:variable,notas:document.getElementById("nr-n").value};
+  var res=await apiPost("addRec",datos);
+  if(res===null) return;
+  datos.id=res.id||nextId();
+  S.recs.push(datos);
+  toast("Recurrente agregado ✓","ok");
+  closeModal(); openCfgRecs();
+}
+
+// ── Admin ─────────────────────────────────────────────
+function openCfgAdmin(){
+  var aId=adminId();
+  var adminDep=S.deptos.find(function(d){return +d.id===aId;});
+  var hist=[...S.adminHist].reverse();
+  var histHtml=hist.length>1?'<div class="card" style="padding:14px;margin-bottom:12px"><p style="font-size:.7rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Historial</p>'+hist.slice(1).map(function(h){var d=S.deptos.find(function(x){return +x.id===+h.depId;});return '<div class="row-between text-sm mb-1"><span>'+(d?"Depto "+d.num+" — "+d.nombre:"—")+'</span><span class="text-slate">'+h.desde+'</span></div>';}).join("")+'</div>':"";
+  var opts=S.deptos.filter(function(d){return +d.id!==aId;}).map(function(d){return '<option value="'+d.id+'">Depto '+d.num+' — '+d.nombre+'</option>';}).join("");
+  var out=backHeader("Administrador","openCfg()")+
+    '<div class="card" style="padding:16px;background:var(--brand-light);border-color:#c7d2fe;margin-bottom:12px">'+
+    '<p style="font-size:.7rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Administrador actual</p>'+
+    '<p style="font-size:1.1rem;font-weight:800;color:var(--brand-dark)">'+(adminDep?"Depto "+adminDep.num+" — "+adminDep.nombre:"—")+'</p>'+
+    '<p style="font-size:.72rem;color:var(--brand);margin-top:4px">Exento de cuota ordinaria desde '+(S.adminHist[S.adminHist.length-1]||{}).desde+'</p></div>'+
+    histHtml+
+    '<div class="card" style="padding:16px">'+
+    '<p style="font-size:.7rem;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Cambiar administrador</p>'+
+    '<div class="field"><label>Nuevo depto administrador</label><select class="sel" id="ca-dep"><option value="">Selecciona…</option>'+opts+'</select></div>'+
+    '<p style="font-size:.72rem;color:var(--slate400);margin-bottom:12px">A partir de hoy este depto quedará exento de la cuota ordinaria.</p>'+
+    '<button class="btn btn-primary btn-lg" onclick="guardarAdmin()">Confirmar cambio de administrador</button></div>';
+  openPage(out);
+}
+async function guardarAdmin(){
+  var depId=document.getElementById("ca-dep").value;
+  if(!depId){toast("Selecciona un departamento","err");return;}
+  var datos={depId:+depId,desde:HOY_STR};
+  var res=await apiPost("addAdmin",datos);
+  if(res===null) return;
+  S.adminHist.push(datos);
+  var d=S.deptos.find(function(x){return +x.id===+depId;});
+  toast("Depto "+(d?d.num:"")+" es el nuevo administrador ✓","ok");
+  openCfgAdmin();
+}
+
+// ── API URL ────────────────────────────────────────────
+function openCfgApi(){
+  openModal(modalHeader("URL de Google Sheets")+
+    '<p class="text-sm text-slate mb-4">Pega aquí la URL de tu Google Apps Script publicado como Web App.</p>'+
+    '<div class="field"><label>URL de Apps Script</label><input type="text" class="inp" id="api-url" value="'+API_URL+'" placeholder="https://script.google.com/macros/s/…/exec"></div>'+
+    '<div class="row" style="gap:8px;margin-top:4px"><button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Cancelar</button>'+
+    '<button class="btn btn-primary" style="flex:1" onclick="guardarApiUrl()">Guardar y reconectar</button></div>'+
+    '</div>'
+  );
+}
+function guardarApiUrl(){
+  var url=document.getElementById("api-url").value.trim();
+  localStorage.setItem("condoApiUrl",url);
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════════
+//  ATTACH EVENTS (called after render)
+// ═══════════════════════════════════════════════════════
+function attachEvents(){
+  // Nothing needed — all onclick are inline
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+async function init(){
+  if(!API_URL){
+    document.getElementById("load-msg").textContent="Configura la URL de Google Sheets";
+    document.getElementById("loading").innerHTML=
+      '<div style="padding:32px;text-align:center;max-width:400px">'+
+      '<div style="font-size:3rem;margin-bottom:16px">🏢</div>'+
+      '<h2 style="margin-bottom:8px;color:var(--slate800)">Torre Palmas San Pedro</h2>'+
+      '<p style="color:var(--slate500);font-size:.9rem;margin-bottom:24px">Para comenzar, ingresa la URL de tu Google Apps Script</p>'+
+      '<input type="text" id="init-url" class="inp" placeholder="https://script.google.com/macros/s/…/exec" style="margin-bottom:12px;text-align:center">'+
+      '<button class="btn btn-primary btn-lg" onclick="guardarUrlInicio()">Conectar →</button>'+
+      '<p style="font-size:.75rem;color:var(--slate400);margin-top:12px">Consulta el README.md para instrucciones detalladas</p></div>';
+    return;
+  }
+
+  var ok=await apiGet();
+  if(!ok){
+    document.getElementById("loading").innerHTML=
+      '<div style="padding:32px;text-align:center">'+
+      '<div style="font-size:3rem;margin-bottom:16px">⚠️</div>'+
+      '<p style="color:var(--rose);font-weight:700;font-size:1rem;margin-bottom:8px">No se pudo conectar</p>'+
+      '<p style="color:var(--slate500);font-size:.85rem;margin-bottom:20px">Verifica la URL de tu Apps Script y que esté publicado correctamente.</p>'+
+      '<button class="btn btn-primary btn-lg" onclick="location.reload()" style="margin-bottom:8px">Reintentar</button>'+
+      '<br><button class="btn btn-ghost btn-lg" onclick="openCfgApiInicio()">Cambiar URL</button></div>';
+    return;
+  }
+
+  document.getElementById("loading").style.display="none";
+  render();
+}
+
+function guardarUrlInicio(){
+  var url=document.getElementById("init-url").value.trim();
+  if(!url){alert("Ingresa la URL");return;}
+  localStorage.setItem("condoApiUrl",url);
+  location.reload();
+}
+function openCfgApiInicio(){
+  document.getElementById("loading").style.display="none";
+  render();
+  openCfgApi();
+}
+
+init();
+</script>
+</body>
+</html>
